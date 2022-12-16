@@ -18,5 +18,6 @@ public class SnakeGameMod {
     public static void main(String[] args) {
         SnakeGameMod startGame = new SnakeGameMod();
         System.out.println("Changes");
+        System.out.println("pull changes from another");
     }
 }
