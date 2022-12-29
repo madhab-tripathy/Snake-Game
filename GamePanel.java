@@ -1,21 +1,31 @@
+import javax.sound.sampled.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.File;
+import java.io.IOException;
 import java.util.Objects;
 import java.util.Random;
 
 public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
-    ImageIcon gameTitle = new ImageIcon(Objects.requireNonNull(getClass().getResource("Icons/snaketitle.jpg")));
-    ImageIcon snakeBody = new ImageIcon(Objects.requireNonNull(getClass().getResource("Icons/snakeimage.png")));
+    ImageIcon gameBackground = new ImageIcon(Objects.requireNonNull(getClass().getResource("Icons/background.jpg")));
+    ImageIcon gameTitle = new ImageIcon(Objects.requireNonNull(getClass().getResource("Icons/SnakeTitleT.png")));
+    ImageIcon snakeBody = new ImageIcon(Objects.requireNonNull(getClass().getResource("Icons/snakebody.png")));
     ImageIcon right = new ImageIcon(Objects.requireNonNull(getClass().getResource("Icons/rightmouth.png")));
     ImageIcon left = new ImageIcon(Objects.requireNonNull(getClass().getResource("Icons/leftmouth.png")));
     ImageIcon up = new ImageIcon(Objects.requireNonNull(getClass().getResource("Icons/upmouth.png")));
     ImageIcon down = new ImageIcon(Objects.requireNonNull(getClass().getResource("Icons/downmouth.png")));
     ImageIcon food = new ImageIcon(Objects.requireNonNull(getClass().getResource("Icons/enemy.png")));
+    ImageIcon t1 = new ImageIcon(Objects.requireNonNull(getClass().getResource("Icons/t1.png")));
+    ImageIcon t2 = new ImageIcon(Objects.requireNonNull(getClass().getResource("Icons/t3.png")));
+    ImageIcon t3 = new ImageIcon(Objects.requireNonNull(getClass().getResource("Icons/t4.png")));
+    ImageIcon t4 = new ImageIcon(Objects.requireNonNull(getClass().getResource("Icons/t5.png")));
+    ImageIcon t5 = new ImageIcon(Objects.requireNonNull(getClass().getResource("Icons/t6.png")));
+    ImageIcon t7 = new ImageIcon(Objects.requireNonNull(getClass().getResource("Icons/t7.png")));
 
     int move = 0;
     int lengthOfSnake = 3;
@@ -31,7 +41,8 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     Random random = new Random();
     int[] posX = {100,125,150,175,200,225,250,275,300,325,350,375,400,425,450,475,500,525,550,575,600,625,650,675,700,725,750,775,800,825,850};
     int[] posY = {100,125,150,175,200,225,250,275,300,325,350,375,400,425,450,475,500,525,550,575,600,625};
-
+    int randomFrute;
+    int[] frutes = {0,1,2,3,4,5,6};
     int foodX = 150;
     int foodY = 150;
     int score = 0;
@@ -48,14 +59,15 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     @Override
     public void paint(Graphics g) {
         super.paint(g);
-        g.setColor(Color.cyan);
+        g.setColor(Color.yellow);
 //      make rectangle for Title
         g.drawRect(24,10,851,55);
 //      make rectangle for game panel
         g.drawRect(24,80,851,575);
         gameTitle.paintIcon(this,g,24,11);
         g.setColor(Color.black);
-        g.fillRect(24,80,851,575);
+        gameBackground.paintIcon(this,g,24,80);
+//        g.fillRect(24,80,851,575);
 
 //      Create Start body Snake
         if(move == 0){
@@ -81,9 +93,30 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         for (int i = 1; i < lengthOfSnake; i++){
             snakeBody.paintIcon(this,g,snakeX[i],snakeY[i]);
         }
-        food.paintIcon(this,g,foodX,foodY);
+
+        if(frutes[randomFrute] == 0){
+            food.paintIcon(this,g,foodX,foodY);
+        }
+        else if(frutes[randomFrute] == 1){
+            t1.paintIcon(this,g,foodX,foodY);
+        }
+        else if(frutes[randomFrute] == 2){
+            t2.paintIcon(this,g,foodX,foodY);
+        }
+        else if(frutes[randomFrute] == 3){
+            t3.paintIcon(this,g,foodX,foodY);
+        }
+        else if(frutes[randomFrute] == 4){
+            t4.paintIcon(this,g,foodX,foodY);
+        }
+        else if(frutes[randomFrute] == 5){
+            t5.paintIcon(this,g,foodX,foodY);
+        }
+        else if(frutes[randomFrute] == 6){
+            t7.paintIcon(this,g,foodX,foodY);
+        }
         if(isGameOver){
-            g.setColor(Color.WHITE);
+            g.setColor(Color.DARK_GRAY);
             g.setFont(new Font(Font.SANS_SERIF,Font.BOLD,30));
             g.drawString("Game Over",380,300);
             g.setFont(new Font(Font.SANS_SERIF,Font.PLAIN,20));
@@ -123,10 +156,21 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         collisionWithBody();
         repaint();
     }
+    private void playMusic(String path){
+        try {
+            AudioInputStream inputStrem = AudioSystem.getAudioInputStream(new File(path));
+            Clip clip = AudioSystem.getClip();
+            clip.open(inputStrem);
+            clip.loop(0);
+        } catch (IOException | LineUnavailableException | UnsupportedAudioFileException e) {
+            throw new RuntimeException(e);
+        }
 
+    }
     private void collisionWithBody() {
         for(int i = lengthOfSnake - 1; i > 0; i--){
             if(snakeX[i] == snakeX[0] && snakeY[i] == snakeY[0]){
+                playMusic("Musics/game-over.wav");
                 isGameOver = true;
                 time.stop();
             }
@@ -134,7 +178,9 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     }
 
     private void collisionWithFood() {
+
         if(snakeX[0] == foodX && snakeY[0] == foodY){
+            playMusic("Musics/frute-eat.wav");
             newFood();
             score++;
             lengthOfSnake++;
@@ -145,6 +191,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     }
 
     private void newFood() {
+        randomFrute = random.nextInt(6);
         foodX = posX[random.nextInt(posX.length-1)];
         foodY = posY[random.nextInt(posY.length-1)];
         for(int i = lengthOfSnake - 1; i >= 0; i--){
